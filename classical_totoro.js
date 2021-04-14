@@ -299,7 +299,7 @@ function classical_tautology_judge(formula) {
 
     // 一文字のときを判定
     if (LEN == 1) {
-        if (formula[0] == '1') {
+        if (formula[0] == "1") {
             return 1;
         }
         else{
@@ -309,7 +309,7 @@ function classical_tautology_judge(formula) {
 
     // 全体が()に挟まれているときは、その間の論理式を判定
     if (formula[0] == "(" && formula[LEN - 1] == ")") {
-        return classical_tautology_judge(formula.substr(1, LEN - 1));
+        return classical_tautology_judge(formula.substring(1, LEN - 1));
     }
 
     var br = 0; // 何個のカッコに入っているか
@@ -343,15 +343,15 @@ function classical_tautology_judge(formula) {
 
     // カッコに入っていない→があったなら、一番最初の→で二つに分けて、￢f∨g
     if (arind != -1) {
-        var f = formula.substr(0, arind);
-        var g = formula.substr(arind + 1);
+        var f = formula.substring(0, arind);
+        var g = formula.substring(arind + 1);
 
         return (1 ^ classical_tautology_judge(f)) | classical_tautology_judge(g);
     }
     // 一番最後の∧か∨で二つに分けて再帰
     else if (juncind != -1) {
-        var f = formula.substr(0, juncind);
-        var g = formula.substr(juncind + 1);
+        var f = formula.substring(0, juncind);
+        var g = formula.substring(juncind + 1);
 
         if (formula[juncind] == "∧") {
             return classical_tautology_judge(f) & classical_tautology_judge(g);
@@ -362,7 +362,7 @@ function classical_tautology_judge(formula) {
     }
     // 一文字が￢なら再帰
     else if (formula[0] == "￢") {
-        return 1 ^ classical_tautology_judge(formula.substr(1, LEN - 1));
+        return 1 ^ classical_tautology_judge(formula.substring(1, LEN));
     }
     return 0;
 }
