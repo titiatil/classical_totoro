@@ -250,6 +250,14 @@ function pp_judge(formula){
     if (symbol_connective2.includes(formula[0])) {
         return 0;
     }
+    //　最後の文字が2-ary connectiveではダメ
+    if (symbol_connective2.includes(formula[LEN-1])) {
+        return 0;
+    }
+    // 最後の文字が"￢", "("ではダメ
+    if (formula[LEN-1]=="(" || formula[LEN-1]=="￢") {
+        return 0;
+    }
     for (var i = 0; i < LEN - 1; i += 1) {
         // ()と、カッコの間に何も入らないのは消えても良いか。
 
