@@ -179,6 +179,31 @@ function choice_masu_color() {
     }
 }
 
+// （変数がp, qのみの）論理式のトートロジー判定
+// 付値を代入した後、function classical_tautology_judgeにより判定している。
+function taut_judge_formula(formula){
+    var tautjudge = 1;
+    if (pp_judge(formula) == 0){
+        tautjudge=0;
+    }
+
+    for (var p of ['0', '1']) {
+        if (tautjudge==0){
+            break;
+        }
+        for (var q of ['0', '1']) {
+            var formula_p = formula.replace(/p/g, p);
+            var formula_pq = formula_p.replace(/q/g, q);
+
+            if (classical_tautology_judge(formula_pq) == 0) {
+                tautjudge = 0;
+                break;
+            }
+        }
+    }
+    return tautjudge;
+}
+
 function made_formula_update() { // 画面上部にSCOREを表示
     made_formula = formula_make(choices_list)
     ctx.fillStyle = 'pink';
@@ -191,28 +216,7 @@ function made_formula_update() { // 画面上部にSCOREを表示
     ctx.fillText(made_formula, 100, 110);
     // ctx.fillTextでtextを書く
 
-    // あんまり良くないけど、トートロジー判定をコピペしています。
-    // 付値の全入れをやめるときにfunction化する。
-    //（今しても良いけど、この判定方法のままfunction化したくないので）
-    var tautjudge = 1;
-    if (pp_judge(made_formula) == 0){
-        tautjudge=0;
-    }
-
-    for (var p of ['0', '1']) {
-        if (tautjudge==0){
-            break;
-        }
-        for (var q of ['0', '1']) {
-            var formula_p = made_formula.replace(/p/g, p);
-            var formula_pq = formula_p.replace(/q/g, q);
-
-            if (classical_tautology_judge(formula_pq) == 0) {
-                tautjudge = 0;
-                break;
-            }
-        }
-    }
+    var tautjudge = taut_judge_formula(made_formula);
 
     if (made_formula.length>0){
         if (tautjudge == 1){
@@ -259,7 +263,10 @@ function pp_judge(formula){
         return 0;
     }
     for (var i = 0; i < LEN - 1; i += 1) {
-        // ()と、カッコの間に何も入らないのは消えても良いか。
+        // "()"と、カッコの間に何も入らないのはダメ。
+        if (formula[i]=="(" && formula[i+1]=="(") {
+            return 0;
+        }
 
         // "("の直後に2-ary connectiveが来てはダメ
         if (formula[i]=="(" && symbol_connective2.includes(formula[i+1])) {
@@ -409,24 +416,8 @@ function keyupfunc(event) {
     if (key_code === 90) {
         player_choice = 0;
         var made_formula = formula_make(choices_list);
-        var tautjudge = 1;
-        if (pp_judge(made_formula) == 0){
-            tautjudge=0;
-        }
-        for (var p of ['0', '1']) {
-            if (tautjudge==0){
-                break;
-            }
-            for (var q of ['0', '1']) {
-                var formula_p = made_formula.replace(/p/g, p);
-                var formula_pq = formula_p.replace(/q/g, q);
+        var tautjudge = taut_judge_formula(made_formula);
 
-                if (classical_tautology_judge(formula_pq) == 0) {
-                    tautjudge = 0;
-                    break;
-                }
-            }
-        }
         // トートロジーならスコアを増やす
         if (tautjudge == 1) {
             SCORE += 10
