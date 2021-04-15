@@ -70,7 +70,7 @@ for (var y = 0; y < tate_masu + tate_yoyaku_masu ; y++) {
 const symbol_bracket = ["(", ")"];
 const symbol_variable = ["p", "q"]; // とりあえず命題変数は二つにしている。いずれ三つ以上に拡張するならこの書き方は良くないが。
 const symbol_connective1 =["￢"];
-const symbol_connective2 = ["→", "∧", "∨"]
+const symbol_connective2 = ["→", "∧", "∨"];
 var symbol_choice = 0;
 var board_randchoice = "p";
 
@@ -264,7 +264,7 @@ function pp_judge(formula){
     }
     for (var i = 0; i < LEN - 1; i += 1) {
         // "()"と、カッコの間に何も入らないのはダメ。
-        if (formula[i]=="(" && formula[i+1]=="(") {
+        if (formula[i]=="(" && formula[i+1]==")") {
             return 0;
         }
 
