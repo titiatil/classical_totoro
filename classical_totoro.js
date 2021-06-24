@@ -55,11 +55,30 @@ function background_color() { // 背景を描く
     }
 }
 
+// 消した論理式一覧を右側に表示する。
+const Erased_formulae = [];
+function Erased_formula_update() {
+    ctx.fillStyle = 'aliceblue';
+    ctx.fillRect(760, 80, 400, 50 * (1 + Erased_formulae.length));
+
+    ctx.fillStyle = 'black';
+    ctx.font = "bold 24px serif";
+    var str = "Erased formulae "
+    ctx.fillText(str, 760, 120);
+    y = 0
+    console.log(Erased_formulae)
+    for (var erased of Erased_formulae) {
+        y += 50
+        ctx.fillText(erased, 780, 120 + y);
+    }
+
+}
+
 // 盤面を初期化
 // 論理式を盤面にランダムで入れる
 const Board = []; //5*8の空の盤面
-for (var y = 0; y < tate_masu + tate_yoyaku_masu ; y++) {
-    var Board2=[]
+for (var y = 0; y < tate_masu + tate_yoyaku_masu; y++) {
+    var Board2 = []
     for (var x = 0; x < yoko_masu; x++) {
         Board2.push("");
     }
@@ -69,7 +88,7 @@ for (var y = 0; y < tate_masu + tate_yoyaku_masu ; y++) {
 // 各記号
 const symbol_bracket = ["(", ")"];
 const symbol_variable = ["p", "q"]; // とりあえず命題変数は二つにしている。いずれ三つ以上に拡張するならこの書き方は良くないが。
-const symbol_connective1 =["￢"];
+const symbol_connective1 = ["￢"];
 const symbol_connective2 = ["→", "∧", "∨"];
 var symbol_choice = 0;
 var board_randchoice = "p";
@@ -93,7 +112,7 @@ function Boardupdate() {
         }
     }
 
-　　// 空のマスをランダムで埋める。
+    // 空のマスをランダムで埋める。
     for (var y = 0; y < tate_masu + tate_yoyaku_masu; y++) {
         for (var x = 0; x < yoko_masu; x++) {
             if (Board[y][x] == "") {
@@ -108,10 +127,10 @@ function Boardupdate() {
                 else if (symbol_choice <= 4) {
                     board_randchoice = symbol_variable[Math.floor(Math.random() * symbol_variable.length)];
                 }
-                else if (symbol_choice <= 5){
+                else if (symbol_choice <= 5) {
                     board_randchoice = symbol_connective1[Math.floor(Math.random() * symbol_connective1.length)];
                 }
-                else if (symbol_choice <= 7){
+                else if (symbol_choice <= 7) {
                     board_randchoice = symbol_connective2[Math.floor(Math.random() * symbol_connective2.length)];
                 }
                 Board[y][x] = board_randchoice;
@@ -181,14 +200,14 @@ function choice_masu_color() {
 
 // （変数がp, qのみの）論理式のトートロジー判定
 // 付値を代入した後、function classical_tautology_judgeにより判定している。
-function taut_judge_formula(formula){
+function taut_judge_formula(formula) {
     var tautjudge = 1;
-    if (pp_judge(formula) == 0){
-        tautjudge=0;
+    if (pp_judge(formula) == 0) {
+        tautjudge = 0;
     }
 
     for (var p of ['0', '1']) {
-        if (tautjudge==0){
+        if (tautjudge == 0) {
             break;
         }
         for (var q of ['0', '1']) {
@@ -218,13 +237,13 @@ function made_formula_update() { // 画面上部にSCOREを表示
 
     var tautjudge = taut_judge_formula(made_formula);
 
-    if (made_formula.length>0){
-        if (tautjudge == 1){
+    if (made_formula.length > 0) {
+        if (tautjudge == 1) {
             ctx.fillStyle = 'black';
             ctx.font = "bold 32px serif";
             ctx.fillText("〇", 400, 110);
         }
-        else{
+        else {
             ctx.fillStyle = 'black';
             ctx.font = "bold 32px serif";
             ctx.fillText("×", 400, 110);
@@ -239,15 +258,16 @@ function screenUpdate() {
     choice_masu_color();
     score_update();
     made_formula_update();
+    Erased_formula_update();
 }
 
 // ∧が二つ続いたり、変数が二つ続いたりしていないかを判定
 // カッコ判定はしていないので、well-formed-formulaかを判定しているわけではない
-function pp_judge(formula){
+function pp_judge(formula) {
     var LEN = formula.length;
 
     // 一文字目が")"ではダメ
-    if (formula[0]==")"){
+    if (formula[0] == ")") {
         return 0;
     }
     //　一文字目が2-ary connectiveではダメ
@@ -255,53 +275,53 @@ function pp_judge(formula){
         return 0;
     }
     //　最後の文字が2-ary connectiveではダメ
-    if (symbol_connective2.includes(formula[LEN-1])) {
+    if (symbol_connective2.includes(formula[LEN - 1])) {
         return 0;
     }
     // 最後の文字が"￢", "("ではダメ
-    if (formula[LEN-1]=="(" || formula[LEN-1]=="￢") {
+    if (formula[LEN - 1] == "(" || formula[LEN - 1] == "￢") {
         return 0;
     }
     for (var i = 0; i < LEN - 1; i += 1) {
         // "()"と、カッコの間に何も入らないのはダメ。
-        if (formula[i]=="(" && formula[i+1]==")") {
+        if (formula[i] == "(" && formula[i + 1] == ")") {
             return 0;
         }
 
         // "("の直後に2-ary connectiveが来てはダメ
-        if (formula[i]=="(" && symbol_connective2.includes(formula[i+1])) {
+        if (formula[i] == "(" && symbol_connective2.includes(formula[i + 1])) {
             return 0;
         }
         // ")"の直後は2-ary connectiveでないとダメ
-        if (formula[i]==")" && !(symbol_connective2.includes(formula[i+1]))) {
+        if (formula[i] == ")" && !(symbol_connective2.includes(formula[i + 1]))) {
             return 0;
         }
         // 変数が二つ連続してはダメ
-        if (symbol_variable.includes(formula[i]) && symbol_variable.includes(formula[i+1])) {
+        if (symbol_variable.includes(formula[i]) && symbol_variable.includes(formula[i + 1])) {
             return 0;
         }
         // 変数の直後に￢が来てはダメ
-        if (symbol_variable.includes(formula[i]) && formula[i+1]=="￢") {
+        if (symbol_variable.includes(formula[i]) && formula[i + 1] == "￢") {
             return 0;
         }
         // 変数の直後に"("が来てはダメ
-        if (symbol_variable.includes(formula[i]) && formula[i+1]=="(") {
+        if (symbol_variable.includes(formula[i]) && formula[i + 1] == "(") {
             return 0;
         }
         // "￢"の直後に")"が来てはダメ
-        if (formula[i]=="￢" && formula[i+1]==")") {
+        if (formula[i] == "￢" && formula[i + 1] == ")") {
             return 0;
         }
         // "￢"の直後に2-ary connectiveが来てはダメ
-        if (formula[i]=="￢" && symbol_connective2.includes(formula[i+1])) {
+        if (formula[i] == "￢" && symbol_connective2.includes(formula[i + 1])) {
             return 0;
         }
         // 2-ary connectiveの直後に")"が来てはダメ
-        if (symbol_connective2.includes(formula[i]) && formula[i+1]==")") {
+        if (symbol_connective2.includes(formula[i]) && formula[i + 1] == ")") {
             return 0;
         }
         // 2-ary connectiveの直後に2-ary connectiveが来てはダメ
-        if (symbol_connective2.includes(formula[i]) && symbol_connective2.includes(formula[i+1])) {
+        if (symbol_connective2.includes(formula[i]) && symbol_connective2.includes(formula[i + 1])) {
             return 0;
         }
     }
@@ -317,7 +337,7 @@ function classical_tautology_judge(formula) {
         if (formula[0] == "1") {
             return 1;
         }
-        else{
+        else {
             return 0;
         }
     }
@@ -338,7 +358,7 @@ function classical_tautology_judge(formula) {
             br -= 1;
         }
         // 途中でbrが-1になったらダメ
-        if (br < 0){
+        if (br < 0) {
             return 0;
         }
         else if (br == 0 && formula[i] == "→") {
@@ -421,6 +441,7 @@ function keyupfunc(event) {
         // トートロジーならスコアを増やす
         if (tautjudge == 1) {
             SCORE += 10
+            Erased_formulae.push(made_formula);
             for (c of choices_list) {
                 Board[tate_yoyaku_masu + c[1]][c[0]] = "";
             }
